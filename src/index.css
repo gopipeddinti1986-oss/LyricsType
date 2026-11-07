@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #121212;
+    --bg-card: #181818;
+    --bg-subtle: #242424;
+    --border: #2e2e2e;
+    --text-main: #ffffff;
+    --text-muted: #a7a7a7;
+    --accent: #1db954;
+    --accent-hover: #1ed760;
+    --accent-glow: rgba(29, 185, 84, 0.25);
+    --error: #ef4444;
+    --error-glow: rgba(239, 68, 68, 0.3);
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+
+  /* Monkeytype Yellow Theme */
+  [data-theme='monkeytype'] {
+    --bg-main: #191919;
+    --bg-card: #222222;
+    --bg-subtle: #2c2c2c;
+    --border: #383838;
+    --text-main: #d1d0c5;
+    --text-muted: #646669;
+    --accent: #e2b714;
+    --accent-hover: #f5c71a;
+    --accent-glow: rgba(226, 183, 20, 0.25);
+    --error: #ca4754;
+    --error-glow: rgba(202, 71, 84, 0.3);
+  }
+
+  /* Cyberpunk Neon Theme */
+  [data-theme='cyberpunk'] {
+    --bg-main: #0a0b10;
+    --bg-card: #121420;
+    --bg-subtle: #1a1e30;
+    --border: #2a304e;
+    --text-main: #f0f6fc;
+    --text-muted: #8b949e;
+    --accent: #00f0ff;
+    --accent-hover: #33f3ff;
+    --accent-glow: rgba(0, 240, 255, 0.35);
+    --error: #ff0055;
+    --error-glow: rgba(255, 0, 85, 0.35);
+  }
+
+  /* Synthwave Theme */
+  [data-theme='synthwave'] {
+    --bg-main: #140d24;
+    --bg-card: #1f1438;
+    --bg-subtle: #2d1d52;
+    --border: #442a7a;
+    --text-main: #f8f9fa;
+    --text-muted: #a69bb8;
+    --accent: #f72585;
+    --accent-hover: #ff479b;
+    --accent-glow: rgba(247, 37, 133, 0.35);
+    --error: #ff4d6d;
+    --error-glow: rgba(255, 77, 109, 0.35);
+  }
+
+  /* Clean Light Theme */
+  [data-theme='light'] {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-subtle: #f1f5f9;
+    --border: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --accent: #0284c7;
+    --accent-hover: #0369a1;
+    --accent-glow: rgba(2, 132, 199, 0.2);
+    --error: #dc2626;
+    --error-glow: rgba(220, 38, 38, 0.2);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-subtle);
+  border-radius: 9999px;
+  border: 2px solid var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border);
+}
+
+/* Caret blinking animation for typing cursor */
+@keyframes typing-caret {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+.animate-caret {
+  animation: typing-caret 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Pulsing glow for active lyric line */
+@keyframes active-lyric-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px -3px var(--accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 25px 2px var(--accent-glow);
+  }
+}
+
+.lyric-active-glow {
+  animation: active-lyric-glow 2.5s ease-in-out infinite;
+}
