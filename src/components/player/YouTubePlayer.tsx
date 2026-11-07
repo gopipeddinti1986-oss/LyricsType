@@ -9,6 +9,7 @@ import {
   Radio,
   ExternalLink,
 } from 'lucide-react'
+import { AudioVisualizer } from '@/components/common/AudioVisualizer'
 
 // YouTube IFrame Player API types
 declare global {
@@ -243,9 +244,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
         <div ref={containerRef} className="h-full w-full" />
 
         {/* Status Overlay */}
-        <div className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-1.5 rounded-md bg-black/70 px-2 py-1 text-[11px] font-mono text-white/90 backdrop-blur-sm">
+        <div className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-2 rounded-md bg-black/70 px-2 py-1 text-[11px] font-mono text-white/90 backdrop-blur-sm">
           <Radio className={`h-3 w-3 ${isPlaying ? 'animate-pulse text-emerald-400' : 'text-zinc-400'}`} />
           <span>{isPlaying ? 'PLAYING' : 'PAUSED'}</span>
+          <AudioVisualizer isPlaying={isPlaying} barCount={8} />
         </div>
 
         <a

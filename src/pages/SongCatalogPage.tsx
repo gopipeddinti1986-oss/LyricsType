@@ -30,6 +30,36 @@ export const SongCatalogPage: React.FC = () => {
   const [customArtist, setCustomArtist] = useState('')
   const [customLyrics, setCustomLyrics] = useState('')
   const [customError, setCustomError] = useState('')
+  const [isFetchingMeta, setIsFetchingMeta] = useState(false)
+
+  // Auto-fetch YouTube metadata using oEmbed
+  const handleUrlBlur = async () => {
+    const videoId = extractYouTubeVideoId(customUrl)
+    if (!videoId) return
+
+    setIsFetchingMeta(true)
+    try {
+      const res = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.title && !customTitle) {
+          // Parse "Artist - Title" or default
+          if (data.title.includes(' - ')) {
+            const parts = data.title.split(' - ')
+            setCustomArtist(parts[0].trim())
+            setCustomTitle(parts.slice(1).join(' - ').trim())
+          } else {
+            setCustomTitle(data.title)
+            if (data.author_name) setCustomArtist(data.author_name)
+          }
+        }
+      }
+    } catch {
+      // Ignore background oembed fetch error
+    } finally {
+      setIsFetchingMeta(false)
+    }
+  }
 
   // Load custom songs from local storage
   const [customSongsList, setCustomSongsList] = useState<Song[]>(() => loadCustomSongs())
@@ -264,14 +294,22 @@ export const SongCatalogPage: React.FC = () => {
               )}
 
               <div>
-                <label className="text-xs font-medium text-[var(--text-muted)]">
-                  YouTube Song URL or Video ID:
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-[var(--text-muted)]">
+                    YouTube Song URL or Video ID:
+                  </label>
+                  {isFetchingMeta && (
+                    <span className="text-[10px] text-[var(--accent)] animate-pulse">
+                      Fetching video title...
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
                   required
                   value={customUrl}
                   onChange={(e) => setCustomUrl(e.target.value)}
+                  onBlur={handleUrlBlur}
                   placeholder="https://www.youtube.com/watch?v=..."
                   className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-2.5 text-xs text-[var(--text-main)] focus:border-[var(--accent)] focus:outline-none"
                 />

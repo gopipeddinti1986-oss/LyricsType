@@ -1,11 +1,12 @@
 import type { TypingMetrics, AICoachAnalysis } from '@/types'
+import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export async function analyzeTypingSession(
   metrics: TypingMetrics,
   songTitle: string,
   songArtist: string
 ): Promise<AICoachAnalysis> {
-  const groqApiKey = import.meta.env.VITE_GROQ_API_KEY || ''
+  const directGroqKey = import.meta.env.VITE_GROQ_API_KEY || ''
 
   // Compute character weakness from actual typed character statistics
   const weakKeysList = Object.entries(metrics.characterStats || {})
@@ -22,8 +23,22 @@ export async function analyzeTypingSession(
   else if (metrics.netWpm >= 30) grade = 'C'
   else grade = 'D'
 
-  // Attempt Groq LLM API request if key is available
-  if (groqApiKey && !groqApiKey.includes('your_groq_api_key')) {
+  // 1. Try secure Supabase Edge Function first (keys stay secure on server)
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase.functions.invoke('groq-coach', {
+        body: { metrics, songTitle, songArtist },
+      })
+      if (!error && data && data.summary) {
+        return data as AICoachAnalysis
+      }
+    } catch {
+      // Fall through to direct or heuristic
+    }
+  }
+
+  // 2. Direct browser test key if supplied
+  if (directGroqKey && !directGroqKey.includes('your_groq_api_key')) {
     try {
       const prompt = `You are the master typing coach on LyricsType.
 Analyze this user's music typing performance:
@@ -52,7 +67,7 @@ Respond STRICTLY in JSON format with this exact structure:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${groqApiKey}`,
+          Authorization: `Bearer ${directGroqKey}`,
         },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
@@ -74,11 +89,11 @@ Respond STRICTLY in JSON format with this exact structure:
         return parsed
       }
     } catch (err) {
-      console.warn('Groq API call encountered an issue, switching to intelligent heuristic coach:', err)
+      console.warn('Groq direct call issue, using intelligent heuristic coach:', err)
     }
   }
 
-  // Fallback intelligent heuristic coach analysis based on true statistics
+  // 3. Fallback intelligent heuristic coach analysis based on true typing statistics
   return generateHeuristicAnalysis(metrics, songTitle, songArtist, weakKeysList, grade)
 }
 

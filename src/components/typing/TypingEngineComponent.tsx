@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import {
   RotateCcw,
   Pause,
@@ -8,10 +8,12 @@ import {
   Clock,
   AlertCircle,
   Sparkles,
+  Keyboard,
 } from 'lucide-react'
 import type { LyricSegment, TypingMode, TypingMetrics } from '@/types'
 import { useTypingEngine } from '@/hooks/useTypingEngine'
 import { useAudioSound } from '@/context/AudioSoundContext'
+import { VirtualKeyboard } from './VirtualKeyboard'
 
 interface TypingEngineComponentProps {
   segments: LyricSegment[]
@@ -39,6 +41,9 @@ export const TypingEngineComponent: React.FC<TypingEngineComponentProps> = ({
   const inputTrapRef = useRef<HTMLInputElement>(null)
   const { playKeySound, playSuccessSound } = useAudioSound()
 
+  const [showKeyboard, setShowKeyboard] = useState(false)
+  const [lastTyped, setLastTyped] = useState<{ char: string; isCorrect: boolean } | null>(null)
+
   const {
     currentLineIndex,
     inputBuffer,
@@ -52,7 +57,8 @@ export const TypingEngineComponent: React.FC<TypingEngineComponentProps> = ({
     segments,
     playbackTime,
     mode,
-    onCharacterTyped: (_char, isCorrect) => {
+    onCharacterTyped: (char, isCorrect) => {
+      setLastTyped({ char, isCorrect })
       playKeySound(!isCorrect)
     },
     onLineComplete: () => {
@@ -177,6 +183,22 @@ export const TypingEngineComponent: React.FC<TypingEngineComponentProps> = ({
             ))}
           </div>
 
+          {/* Keyboard toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowKeyboard(!showKeyboard)
+            }}
+            title="Toggle Virtual Keyboard"
+            className={`flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] transition-colors ${
+              showKeyboard
+                ? 'bg-[var(--accent)] text-black border-[var(--accent)]'
+                : 'bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
+          >
+            <Keyboard className="h-4 w-4" />
+          </button>
+
           {/* Pause Button */}
           <button
             onClick={(e) => {
@@ -282,6 +304,17 @@ export const TypingEngineComponent: React.FC<TypingEngineComponentProps> = ({
           </div>
         )}
       </div>
+
+      {/* Virtual Keyboard Option */}
+      {showKeyboard && (
+        <div className="pt-2 border-t border-[var(--border)] animate-in fade-in">
+          <VirtualKeyboard
+            activeChar={targetLineText[inputBuffer.length]}
+            lastTypedChar={lastTyped?.char}
+            isLastCorrect={lastTyped?.isCorrect}
+          />
+        </div>
+      )}
 
       {/* Bottom Status / Instructions */}
       <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
